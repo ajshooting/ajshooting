@@ -1,10 +1,16 @@
+[![](https://raw.githubusercontent.com/ajshooting/ajshooting/main/profile-summary-card-output/default/0-profile-details.svg)](https://github.com/vn7n24fzkq/github-profile-summary-cards)
+
+[![](https://raw.githubusercontent.com/ajshooting/ajshooting/main/profile-summary-card-output/default/4-productive-time.svg)](https://github.com/vn7n24fzkq/github-profile-summary-cards)
+
+
 ![](https://komarev.com/ghpvc/?username=ajshooting)
 
 [![My Skills](https://skillicons.dev/icons?i=py,js,html,linux,blender,)](https://skillicons.dev)
 
+[![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=ajshooting&layout=compact)](https://github.com/anuraghazra/github-readme-stats)  
+
 [![Rating](https://badgen.org/img/atcoder/ajshooting/rating/algorithm?style=flat-square)](https://atcoder.jp/users/ajshooting?contestType=algo)
 
-[![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=ajshooting)](https://github.com/anuraghazra/github-readme-stats&layout=compact)
 
 [![Anurag's GitHub stats](https://github-readme-stats.vercel.app/api?username=ajshooting)](https://github.com/anuraghazra/github-readme-stats&show_icons=true)
 
