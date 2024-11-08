@@ -5,11 +5,8 @@
 
 ![](https://komarev.com/ghpvc/?username=ajshooting)  
 [![My Skills](https://skillicons.dev/icons?i=py,js,discordjs,php,cpp,cs,latex,kali,linux,blender,)](https://skillicons.dev)  
-↑できるとは言っていない  
 
 [![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=ajshooting&layout=compact)](https://github.com/anuraghazra/github-readme-stats&size_weight=0.5&count_weight=0.5)  
-
-[![Rating](https://badgen.org/img/atcoder/ajshooting/rating/algorithm?style=flat-square)](https://atcoder.jp/users/ajshooting?contestType=algo)
 
 
 <!-- 
