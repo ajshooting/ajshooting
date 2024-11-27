@@ -2,7 +2,7 @@ name: Generate Stats Images
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   schedule:
     - cron: "0 * * * *"
   workflow_dispatch:
@@ -49,7 +49,7 @@ jobs:
       run: |
         git config --global user.name "jstrieb/github-stats"
         git config --global user.email "github-stats[bot]@jstrieb.github.io"
-        git pull origin master
+        git pull origin main
         git add .
         # Force the build to succeed, even if no files were changed
         git commit -m 'Update generated files' || true
