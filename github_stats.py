@@ -133,7 +133,7 @@ class Queries(object):
             field: UPDATED_AT,
             direction: DESC
         }},
-        ownerAffiliations: [OWNER, COLLABORATOR, ORGANIZATION_MEMBER],
+        affiliations: [OWNER, COLLABORATOR, ORGANIZATION_MEMBER],
         isFork: false,
         after: {"null" if owned_cursor is None else '"'+ owned_cursor +'"'}
     ) {{
