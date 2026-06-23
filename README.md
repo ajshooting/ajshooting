@@ -1,5 +1,4 @@
-![](https://raw.githubusercontent.com/ajshooting/ajshooting/master/generated/languages.svg#gh-dark-mode-only)
-![](https://raw.githubusercontent.com/ajshooting/ajshooting/master/generated/languages.svg#gh-light-mode-only)
+![](https://raw.githubusercontent.com/ajshooting/ajshooting/master/generated/languages.svg#gh-dark-mode-only) ![](https://raw.githubusercontent.com/ajshooting/ajshooting/master/generated/languages.svg#gh-light-mode-only)
 
 [![](https://raw.githubusercontent.com/ajshooting/ajshooting/main/profile-summary-card-output/default/4-productive-time.svg)](https://github.com/vn7n24fzkq/github-profile-summary-cards)
 
