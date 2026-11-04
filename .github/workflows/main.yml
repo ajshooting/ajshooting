@@ -2,55 +2,103 @@ name: Generate Stats Images
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
+  pull_request:
   schedule:
-    - cron: "0 * * * *"
+    - cron: "5 0 * * *"
   workflow_dispatch:
 
 permissions:
   contents: write
 
+concurrency:
+  group: stats-images-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
-    runs-on: ubuntu-24.04
-
+    runs-on: ubuntu-latest
     steps:
-    # Check out repository under $GITHUB_WORKSPACE, so the job can access it
-    - uses: actions/checkout@v3
+      - name: Check out profile repository
+        uses: actions/checkout@v6
 
-    # Run using Python 3.8 for consistency and aiohttp
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.8'
-        architecture: 'x64'
-        cache: 'pip'
+      # Use a pinned upstream revision so that the generated images do not
+      # change unexpectedly when jstrieb/github-stats is updated.
+      - name: Check out upstream github-stats
+        uses: actions/checkout@v6
+        with:
+          repository: jstrieb/github-stats
+          ref: ef574fae2ce8311f3e1ebb43e07c0c0fae0a41b6
+          path: upstream
+          persist-credentials: false
 
-    # Install dependencies with `pip`
-    - name: Install requirements
-      run: |
-        python3 -m pip install --upgrade pip setuptools wheel
-        python3 -m pip install -r requirements.txt
+      - name: Set up Zig
+        uses: mlugg/setup-zig@d1434d08867e3ee9daa34448df10607b98908d29 # v2
+        with:
+          version: 0.16.0
 
-    # Generate all statistics images
-    - name: Generate images
-      run: |
-        python3 --version
-        python3 generate_images.py
-      env:
-        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        EXCLUDED: ${{ secrets.EXCLUDED }}
-        EXCLUDED_LANGS: ${{ secrets.EXCLUDED_LANGS }}
-        EXCLUDE_FORKED_REPOS: true
+      # Pull requests compile the new generator without requiring secrets.
+      - name: Build and smoke-test
+        run: |
+          set -euo pipefail
+          (cd upstream && zig build)
+          install -m 755 upstream/zig-out/bin/github-stats "$RUNNER_TEMP/github-stats"
+          "$RUNNER_TEMP/github-stats" --version
+          rm -rf upstream
 
-    # Commit all changed files to the repository
-    - name: Commit to the repo
-      run: |
-        git config --global user.name "jstrieb/github-stats"
-        git config --global user.email "github-stats[bot]@jstrieb.github.io"
-        git pull origin main
-        git add .
-        # Force the build to succeed, even if no files were changed
-        git commit -m 'Update generated files' || true
-        git push
+      - name: Generate images
+        if: github.event_name != 'pull_request'
+        env:
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          EXCLUDE_REPOS: ${{ secrets.EXCLUDED }}
+          EXCLUDE_LANGS: ${{ secrets.EXCLUDED_LANGS }}
+          MAX_RETRIES: "5"
+        run: |
+          set -euo pipefail
+          if [[ -z "${ACCESS_TOKEN:-}" ]]; then
+            echo "::error::ACCESS_TOKEN secret is missing"
+            exit 1
+          fi
+
+          # Capture raw statistics once. The JSON stays in the ephemeral
+          # runner directory, since it may contain private repository data.
+          "$RUNNER_TEMP/github-stats" \
+            --json-output-file "$RUNNER_TEMP/profile-stats.json" \
+            --overview-output-file "$RUNNER_TEMP/overview-preview.svg" \
+            --languages-output-file "$RUNNER_TEMP/languages-preview.svg"
+
+          # The old Python workflow used EXCLUDE_FORKED_REPOS=true,
+          # which excluded contributed-to repositories not owned by the
+          # authenticated user. Zig has no equivalent flag; derive these
+          # exclusions from the raw JSON and re-render locally.
+          excluded_contributions="$(jq -r '
+            .user as $owner
+            | [.repositories[].name
+               | select((ascii_downcase | startswith(($owner | ascii_downcase) + "/")) | not)]
+            | join(",")
+          ' "$RUNNER_TEMP/profile-stats.json")"
+          if [[ -n "$excluded_contributions" ]]; then
+            export EXCLUDE_REPOS="${EXCLUDE_REPOS:+${EXCLUDE_REPOS},}${excluded_contributions}"
+          fi
+
+          mkdir -p generated
+          "$RUNNER_TEMP/github-stats" \
+            --json-input-file "$RUNNER_TEMP/profile-stats.json" \
+            --overview-output-file generated/overview.svg \
+            --languages-output-file generated/languages.svg
+
+      # Keep the existing image paths and avoid checking in private JSON.
+      - name: Commit generated images
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add generated/overview.svg generated/languages.svg
+          if git diff --cached --quiet; then
+            echo "No image changes."
+          else
+            git commit -m "Update generated stats images"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
