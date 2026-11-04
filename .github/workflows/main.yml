@@ -89,7 +89,7 @@ jobs:
 
       # Keep the existing image paths and avoid checking in private JSON.
       - name: Commit generated images
-        if: github.event_name != 'pull_request'
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
